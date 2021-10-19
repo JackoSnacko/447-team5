@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>HW1
+	</title>
+</head>
+<body>
+	<div class="content">
+		<table>
+			<tr>
+				<th>Name</th>
+				<th>ID</th>
+				<th>Points</th>
+				<th>Actions</th>
+			</tr>
+			{% for sample in samples %}
+				<tr>
+					<td>{{ sample.name }}</td>
+					<td>{{ sample.student_id }}</td>
+					<td>{{ sample.points }}</td>
+					<td>
+						<a href="/delete/{{sample.student_id}}">Delete</a>
+						<br>
+						<a href="/update/{{sample.student_id}}">Update</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</table>
+		<form action="/" method="POST">
+			<input type="text" name="name" id="content">
+			<input type="number" name="id" id="content_" min="0" max="99999" value="0">
+			<input type="number" name="points" id="content_" min="0" max="999" value="0">
+			<input type="submit" value="Add Student">
+		</form>
+		
+	</div>
+</body>
+</html>

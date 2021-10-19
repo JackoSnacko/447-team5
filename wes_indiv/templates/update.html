@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+	<div class="form">
+		<form action="/update/{{sample.student_id}}" method="POST">
+			<table>
+				<th>Name</th>
+				<th>Points</th>
+			</table>
+			<input type="text" name="name" id="content" value="{{sample.name}}">
+			<input type="number" name="points" id="content_" min="0" max="999" value="{{sample.points}}">
+			<input type="submit" value="Update">
+		</form>
+	</div>
+</body>
+</html>
