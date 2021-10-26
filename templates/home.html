@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin="" />
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+
+<form action="/" id="formSubmission" method="POST">
+    <span>Student ID</span>
+    <input type="number" name="student_id" placeholder="enter ID" id="name">
+    <span>Student Name</span>
+    <input type="text" name="student_name" placeholder="enter name" id="description">
+    <span>Student Grade</span>
+    <input type="number" name="student_grade" placeholder="enter grade" id="grade">
+
+    <button type="submit">Add Entry</button>
+</form>
+
+<div id="mapid"></div>
+
+<table>
+    <tr>
+        <th>Student ID    </th>
+        <th>Student Name        </th>
+        <th>Student Grade       </th>
+    </tr>
+    {% for user in grades %}
+    <tr>
+        <td>{{user.student_id}}</td>
+        <td>{{user.student_name}}</td>
+        <td>{{user.student_grade}}</td>
+        <td><button><a href="/delete/{{user.student_id}}">Delete</a>
+        <td><button><a href="/updateentry/{{user.student_id}}">Update</a>
+    </tr>
+    {% endfor %}
+
+</table>
+
+
+
+
+
+

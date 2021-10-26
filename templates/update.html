@@ -1,0 +1,10 @@
+<div class="container">
+    <form action="/updateentry/{{updateentry.student_id}}" id="formSubmission" method="POST">
+        <span>Student Name</span>
+        <input type="text" name="student_name" placeholder="enter name" id="name" value="{{updateentry.student_name}}">
+        <span>Student Grade</span>
+        <input type="number" name="student_grade" placeholder="enter grade" id="description" value="{{updateentry.student_grade}}">
+        <button type="submit">Update</button>
+    </form>
+
+        
