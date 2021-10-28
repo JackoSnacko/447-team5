@@ -2,7 +2,7 @@
 <html>
 <head>
 	
-	<title>Choropleth Tutorial - Leaflet</title>
+	<title>CMSC 447 Team 5 - Group Project</title>
 
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,7 +32,7 @@
 
 <div id='map'></div>
 
-<script type="text/javascript" src="/Users/jackbitzel/Desktop/project1/static/maryland-data.js"></script>
+<script type="text/javascript" src="{{url_for('static', filename='maryland-data.js')}}"></script>
 
 <script type="text/javascript">
 
@@ -57,13 +57,14 @@
 		return this._div;
 	};
 
-	info.update = function (props) {
-		this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
-			'<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
-			: 'Hover over a state');
+	info.update = function (props, p1, p2) {
+		this._div.innerHTML = (props ? '<h4>Maryland Covid Rates</h4>' + '<b>' + props + '</b><br />' + 'Cases: ' + p1 + '</b><br />' + 'Deaths: ' + p2: '<h4>Hover over a county to display data</h4>');
 	};
+	
 
 	info.addTo(map);
+
+	
 
 
 	// get color depending on population density value
@@ -102,8 +103,83 @@
 		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
 			layer.bringToFront();
 		}
+		switch(layer.feature.properties.name){
+			case "Allegany County": 
+				info.update("Allegany County", "{{covid_data[0][1]}}", "{{covid_data[0][25]}}");
+				break;
+			case "Anne Arundel County":
+				info.update("Anne Arundel County", "{{covid_data[0][2]}}", "{{covid_data[0][26]}}");
+				break;
+			case "Baltimore County": 
+				info.update("Baltimore County", "{{covid_data[0][3]}}", "{{covid_data[0][27]}}");
+				break;
+			case "Calvert County": 
+				info.update("Calvert County", "{{covid_data[0][4]}}", "{{covid_data[0][28]}}");
+				break;
+			case "Caroline County": 
+				info.update("Caroline County", "{{covid_data[0][5]}}", "{{covid_data[0][29]}}");
+				break;
+			case "Carroll County": 
+				info.update("Carroll County", "{{covid_data[0][6]}}", "{{covid_data[0][30]}}");
+				break;
+			case "Cecil County": 
+				info.update("Cecil County", "{{covid_data[0][7]}}", "{{covid_data[0][31]}}");
+				break;
+			case "Charles County": 
+				info.update("Charles County", "{{covid_data[0][8]}}", "{{covid_data[0][32]}}");
+				break;
+			case "Dorchester County": 
+				info.update("Dorchester County", "{{covid_data[0][9]}}", "{{covid_data[0][33]}}");
+				break;
+			case "Frederick County": 
+				info.update("Frederick County", "{{covid_data[0][10]}}", "{{covid_data[0][34]}}");
+				break;
+			case "Garrett County": 
+				info.update("Garrett County", "{{covid_data[0][11]}}", "{{covid_data[0][35]}}");
+				break;
+			case "Harford County": 
+				info.update("Harford County", "{{covid_data[0][12]}}", "{{covid_data[0][36]}}");
+				break;
+			case "Howard County": 
+				info.update("Howard County", "{{covid_data[0][13]}}", "{{covid_data[0][37]}}");
+				break;
+			case "Kent County": 
+				info.update("Kent County", "{{covid_data[0][14]}}", "{{covid_data[0][38]}}");
+				break;
+			case "Montgomery County": 
+				info.update("Montgomery County", "{{covid_data[0][15]}}", "{{covid_data[0][39]}}");
+				break;
+			case "Prince George's County": 
+				info.update("Prince George's County", "{{covid_data[0][16]}}", "{{covid_data[0][40]}}");
+				break;
+			case "Queen Anne's County": 
+				info.update("Queen Anne's County", "{{covid_data[0][17]}}", "{{covid_data[0][41]}}");
+				break;
+			case "St. Mary's County": 
+				info.update("St. Mary's County", "{{covid_data[0][18]}}", "{{covid_data[0][42]}}");
+				break;
+			case "Somerset County": 
+				info.update("Somerset County", "{{covid_data[0][19]}}", "{{covid_data[0][43]}}");
+				break;
+			case "Talbot County": 
+				info.update("Talbot County", "{{covid_data[0][20]}}", "{{covid_data[0][44]}}");
+				break;
+			case "Washington County": 
+				info.update("Washington County", "{{covid_data[0][21]}}", "{{covid_data[0][45]}}");
+				break;
+			case "Wicomico County": 
+				info.update("Wicomico County", "{{covid_data[0][22]}}", "{{covid_data[0][46]}}");
+				break;
+			case "Worcester County": 
+				info.update("Worcester County", "{{covid_data[0][23]}}", "{{covid_data[0][47]}}");
+				break;
+			case "Baltimore City": 
+				info.update("Baltimore City", "{{covid_data[0][24]}}", "{{covid_data[0][48]}}");
+				break;
+			default:
+				info.update("Blank", "5");
+		};
 
-		info.update(layer.feature.properties);
 	}
 
 	var geojson;
