@@ -5,7 +5,7 @@ import datetime
 import pymysql
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///covid.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:''@localhost/covid'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db=SQLAlchemy(app)
 
@@ -66,7 +66,7 @@ class covid_data(db.Model):
 @app.route("/", methods=['GET', 'POST'])
 def main_page():
 
-    con = pymysql.connect(host='localhost',user='root',password='piedmont',db='covid', use_unicode=True, charset='utf8')
+    con = pymysql.connect(host='localhost',user='username',password='',db='covid', use_unicode=True, charset='utf8')
     cur = con.cursor()
     searchDate = "N/A"
 
