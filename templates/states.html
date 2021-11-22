@@ -1,241 +1,250 @@
 <!DOCTYPE html>
 <html>
-<head>
-	
-	<title>CMSC 447 Team 5 - Group Project</title>
+	<head>
+		
+		<title>CMSC 447 Team 5 - Group Project</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+	    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
-	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+		<style>
+			html, body {
+				height: 100%;
+				margin: 0;
+			}
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+			#map {
+				height: 100%;
+				width: 100%;
+				float: left;
+				z-index: 1;
+				position: relative;
+			}
 
+			.overlay {
+				height: 105px;
+				width: 175px;
+				position: relative; bottom: 145px; left: 20px;
+				float: left;
+				z-index: 3;
+				background-color:#ffffff00;
+				pointer-events: auto;
+				padding: 10px 10px; 
+				font: 14px/16px Arial, Helvetica, sans-serif; 
+				color:#777;
+				background: white; 
+				background: rgba(255,255,255,0.8); 
+				box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+				border-radius: 5px;  
+				
+	  		}
 
-	<style>
-		html, body {
-			height: 100%;
-			margin: 0;
-		}
-		#map {
-			width: 600px;
-			height: 400px;
-		}
-	</style>
+			.info{
+				padding: 6px 8px;
+				font: 14px/16px Arial, Helvetica, sans-serif;
+				background: white; 
+				background: rgba(255,255,255,0.8); 
+				box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+				border-radius: 5px; 
+			} 
+			.info h4 { 
+				margin: 0 0 5px; 
+				color: #777;
+			}
+			.legend{
+				text-align: left;
+				line-height: 18px;
+				color: #555; 
+			} 
+			.legend i { 
+				width: 18px; 
+				height: 18px; 
+				float: left; 
+				margin-right: 8px; 
+				opacity: 0.7; 
+			}
+		</style>
 
-	<style>#map { width: 800px; height: 500px; }
-.info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
-.legend { text-align: left; line-height: 18px; color: #555; } .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }</style>
-</head>
-<body>
+	</head>
 
-<div id='map'></div>
+	<body>
+		<div id='map'></div>
+		<script type="text/javascript" src="{{url_for('static', filename='maryland-data.js')}}"></script>
+		<script type="text/javascript">
 
-<script type="text/javascript" src="{{url_for('static', filename='maryland-data.js')}}"></script>
+			var map = L.map('map').setView([39.0458, -76.6413], 8);
 
-<script type="text/javascript">
-
-	var map = L.map('map').setView([39.0458, -76.6413], 7);
-
-	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-		maxZoom: 18,
-		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
-			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-		id: 'mapbox/light-v9',
-		tileSize: 512,
-		zoomOffset: -1
-	}).addTo(map);
-
-
-	// control that shows state info on hover
-	var info = L.control();
-
-	info.onAdd = function (map) {
-		this._div = L.DomUtil.create('div', 'info');
-		this.update();
-		return this._div;
-	};
-
-	info.update = function (props, p1, p2) {
-		this._div.innerHTML = (props ? '<h4>Maryland Covid Rates</h4>' + '<b>' + props + '</b><br />' + 'Cases: ' + p1 + '</b><br />' + 'Deaths: ' + p2: '<h4>Hover over a county to display data</h4>');
-	};
-	
-
-	info.addTo(map);
-
-	
-
-
-	// get color depending on population density value
-	function getColor(d) {
-		return d > 1000 ? '#800026' :
-				d > 500  ? '#BD0026' :
-				d > 200  ? '#E31A1C' :
-				d > 100  ? '#FC4E2A' :
-				d > 50   ? '#FD8D3C' :
-				d > 20   ? '#FEB24C' :
-				d > 10   ? '#FED976' :
-							'#FFEDA0';
-	}
-
-	function style(feature) {
-		return {
-			weight: 2,
-			opacity: 1,
-			color: 'white',
-			dashArray: '3',
-			fillOpacity: 0.7,
-			fillColor: getColor(feature.properties.density)
-		};
-	}
-
-	function highlightFeature(e) {
-		var layer = e.target;
-
-		layer.setStyle({
-			weight: 5,
-			color: '#666',
-			dashArray: '',
-			fillOpacity: 0.7
-		});
-
-		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-			layer.bringToFront();
-		}
-		switch(layer.feature.properties.name){
-			case "Allegany County": 
-				info.update("Allegany County", "{{covid_data[0][1]}}", "{{covid_data[0][25]}}");
-				break;
-			case "Anne Arundel County":
-				info.update("Anne Arundel County", "{{covid_data[0][2]}}", "{{covid_data[0][26]}}");
-				break;
-			case "Baltimore County": 
-				info.update("Baltimore County", "{{covid_data[0][3]}}", "{{covid_data[0][27]}}");
-				break;
-			case "Calvert County": 
-				info.update("Calvert County", "{{covid_data[0][4]}}", "{{covid_data[0][28]}}");
-				break;
-			case "Caroline County": 
-				info.update("Caroline County", "{{covid_data[0][5]}}", "{{covid_data[0][29]}}");
-				break;
-			case "Carroll County": 
-				info.update("Carroll County", "{{covid_data[0][6]}}", "{{covid_data[0][30]}}");
-				break;
-			case "Cecil County": 
-				info.update("Cecil County", "{{covid_data[0][7]}}", "{{covid_data[0][31]}}");
-				break;
-			case "Charles County": 
-				info.update("Charles County", "{{covid_data[0][8]}}", "{{covid_data[0][32]}}");
-				break;
-			case "Dorchester County": 
-				info.update("Dorchester County", "{{covid_data[0][9]}}", "{{covid_data[0][33]}}");
-				break;
-			case "Frederick County": 
-				info.update("Frederick County", "{{covid_data[0][10]}}", "{{covid_data[0][34]}}");
-				break;
-			case "Garrett County": 
-				info.update("Garrett County", "{{covid_data[0][11]}}", "{{covid_data[0][35]}}");
-				break;
-			case "Harford County": 
-				info.update("Harford County", "{{covid_data[0][12]}}", "{{covid_data[0][36]}}");
-				break;
-			case "Howard County": 
-				info.update("Howard County", "{{covid_data[0][13]}}", "{{covid_data[0][37]}}");
-				break;
-			case "Kent County": 
-				info.update("Kent County", "{{covid_data[0][14]}}", "{{covid_data[0][38]}}");
-				break;
-			case "Montgomery County": 
-				info.update("Montgomery County", "{{covid_data[0][15]}}", "{{covid_data[0][39]}}");
-				break;
-			case "Prince George's County": 
-				info.update("Prince George's County", "{{covid_data[0][16]}}", "{{covid_data[0][40]}}");
-				break;
-			case "Queen Anne's County": 
-				info.update("Queen Anne's County", "{{covid_data[0][17]}}", "{{covid_data[0][41]}}");
-				break;
-			case "St. Mary's County": 
-				info.update("St. Mary's County", "{{covid_data[0][18]}}", "{{covid_data[0][42]}}");
-				break;
-			case "Somerset County": 
-				info.update("Somerset County", "{{covid_data[0][19]}}", "{{covid_data[0][43]}}");
-				break;
-			case "Talbot County": 
-				info.update("Talbot County", "{{covid_data[0][20]}}", "{{covid_data[0][44]}}");
-				break;
-			case "Washington County": 
-				info.update("Washington County", "{{covid_data[0][21]}}", "{{covid_data[0][45]}}");
-				break;
-			case "Wicomico County": 
-				info.update("Wicomico County", "{{covid_data[0][22]}}", "{{covid_data[0][46]}}");
-				break;
-			case "Worcester County": 
-				info.update("Worcester County", "{{covid_data[0][23]}}", "{{covid_data[0][47]}}");
-				break;
-			case "Baltimore City": 
-				info.update("Baltimore City", "{{covid_data[0][24]}}", "{{covid_data[0][48]}}");
-				break;
-			default:
-				info.update("Blank", "5");
-		};
-
-	}
-
-	var geojson;
-
-	function resetHighlight(e) {
-		geojson.resetStyle(e.target);
-		info.update();
-	}
-
-	function zoomToFeature(e) {
-		map.fitBounds(e.target.getBounds());
-	}
-
-	function onEachFeature(feature, layer) {
-		layer.on({
-			mouseover: highlightFeature,
-			mouseout: resetHighlight,
-			click: zoomToFeature
-		});
-	}
-
-	geojson = L.geoJson(maryland_counties, {
-		style: style,
-		onEachFeature: onEachFeature
-	}).addTo(map);
-
-	map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a>');
+			L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+				maxZoom: 18,
+				attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' + 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+				id: 'mapbox/light-v9',
+				tileSize: 512,
+				zoomOffset: -1
+			}).addTo(map);
 
 
-	var legend = L.control({position: 'bottomright'});
+			// control that shows state info on hover
+			var info = L.control();
 
-	legend.onAdd = function (map) {
+			info.onAdd = function (map) {
+				this._div = L.DomUtil.create('div', 'info');
+				this.update();
+				return this._div;
+			}
 
-		var div = L.DomUtil.create('div', 'info legend'),
-			grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-			labels = [],
-			from, to;
+			info.update = function (props, p1, p2) {
+				this._div.innerHTML = (props ? '<h4>Maryland Covid Rates</h4>' + '<b>' + props + '</b><br />' + 'Cases: ' + p1 + '</b><br />' + 'Deaths: ' + p2: '<h4>Hover over a county to display data</h4>');
+			}
+			
+			info.addTo(map);
 
-		for (var i = 0; i < grades.length; i++) {
-			from = grades[i];
-			to = grades[i + 1];
+			// get color depending on population density value
+			function getColor(d) {
 
-			labels.push(
-				'<i style="background:' + getColor(from + 1) + '"></i> ' +
-				from + (to ? '&ndash;' + to : '+'));
-		}
+				return d > 600 ? '#800026' :
+						d > 500  ? '#8E1A33' :
+						d > 400  ? '#9C3441' :
+						d > 200  ? '#AA4F4E' :
+						d > 100  ? '#B8695C' :
+						d > 75   ? '#C68369' :
+						d > 40   ? '#D49E77' :
+						d > 15   ? '#E2B884' :
+						d > 10   ? '#F0D292' :
+									'#FFEDA0';
+			}
+			var counties = {
+  					"Allegany County": ["{{covid_data[0][2]}}", "{{covid_data[0][3]}}"],
+  					"Anne Arundel County": ["{{covid_data[1][2]}}", "{{covid_data[1][3]}}"],
+  					"Baltimore City": ["{{covid_data[2][2]}}", "{{covid_data[2][3]}}"],
+					"Baltimore County": ["{{covid_data[3][2]}}", "{{covid_data[3][3]}}"],
+					"Calvert County": ["{{covid_data[4][2]}}", "{{covid_data[4][3]}}"],
+					"Caroline County": ["{{covid_data[5][2]}}", "{{covid_data[5][3]}}"],
+					"Carroll County": ["{{covid_data[6][2]}}", "{{covid_data[6][3]}}"],
+					"Cecil County": ["{{covid_data[7][2]}}", "{{covid_data[7][3]}}"],
+					"Charles County": ["{{covid_data[8][2]}}", "{{covid_data[8][3]}}"],
+					"Dorchester County": ["{{covid_data[9][2]}}", "{{covid_data[9][3]}}"],
+					"Frederick County": ["{{covid_data[10][2]}}", "{{covid_data[10][3]}}"],
+					"Garrett County": ["{{covid_data[11][2]}}", "{{covid_data[11][3]}}"],
+					"Harford County": ["{{covid_data[12][2]}}", "{{covid_data[12][3]}}"],
+					"Howard County": ["{{covid_data[13][2]}}", "{{covid_data[13][3]}}"],
+					"Kent County": ["{{covid_data[14][2]}}", "{{covid_data[14][3]}}"],
+					"Montgomery County": ["{{covid_data[15][2]}}", "{{covid_data[15][3]}}"],
+					"Prince George's County": ["{{covid_data[16][2]}}", "{{covid_data[16][3]}}"],
+					"Queen Anne's County": ["{{covid_data[17][2]}}", "{{covid_data[17][3]}}"],
+					"Somerset County": ["{{covid_data[18][2]}}", "{{covid_data[18][3]}}"],
+					"St. Mary's County": ["{{covid_data[19][2]}}", "{{covid_data[19][3]}}"],
+					"Talbot County": ["{{covid_data[20][2]}}", "{{covid_data[20][3]}}"],
+					"Washington County": ["{{covid_data[21][2]}}", "{{covid_data[21][3]}}"],
+					"Wicomico County": ["{{covid_data[22][2]}}", "{{covid_data[22][3]}}"],
+					"Worcester County": ["{{covid_data[23][2]}}", "{{covid_data[23][3]}}"]
+				};
+			var cases = 0;
+			var deaths = 1;
 
-		div.innerHTML = labels.join('<br>');
-		return div;
-	};
 
-	legend.addTo(map);
+			function style(feature) {
+				var index = 0;
+				var fill_color = 0;
 
-</script>
+				fill_color = getColor(counties[feature.properties.name][cases])
 
+				return {
+					weight: 2,
+					opacity: 1,
+					color: 'white',
+					dashArray: '3',
+					fillOpacity: 0.7,
+					fillColor: fill_color
+				};
+			}
 
+			function highlightFeature(e) {
+				var layer = e.target;
 
-</body>
+				layer.setStyle({
+					weight: 5,
+					color: '#666',
+					dashArray: '',
+					fillOpacity: 0.7
+				});
+
+				if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+					layer.bringToFront();
+				}
+
+				info.update(layer.feature.properties.name, counties[layer.feature.properties.name][cases], counties[layer.feature.properties.name][deaths]);
+
+			}
+
+			var geojson;
+
+			function resetHighlight(e) {
+				geojson.resetStyle(e.target);
+				info.update();
+			}
+
+			function zoomToFeature(e) {
+				map.fitBounds(e.target.getBounds());
+			}
+
+			function onEachFeature(feature, layer) {
+				layer.on({
+					mouseover: highlightFeature,
+					mouseout: resetHighlight,
+					click: zoomToFeature
+				});
+			}
+
+			geojson = L.geoJson(maryland_counties, {
+				style: style,
+				onEachFeature: onEachFeature
+			}).addTo(map);
+
+			map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a>');
+
+			var legend = L.control({position: 'bottomright'});
+			legend.onAdd = function (map) {
+				var div = L.DomUtil.create('div', 'info legend'),
+					grades = [0, 10, 15, 40, 75, 100, 200, 400, 500, 600],
+					labels = [],
+					from, to;
+
+				for (var i = 0; i < grades.length; i++) {
+					from = grades[i];
+					to = grades[i + 1];
+					labels.push('<i style="background:' + getColor(from + 1) + '"></i> ' + from + (to ? '&ndash;' + to : '+') );
+				}
+				div.innerHTML = labels.join('<br>');
+				return div;
+			}
+
+			legend.addTo(map);
+
+		</script>
+
+		<div class="overlay">
+			<form action="/" id="formSubmission2" method="POST">
+				<div>
+					<input type="radio" id="cases" name="color" value="cases"
+						   checked>
+					<label for="cases">Color by Cases</label>
+				  </div>
+				  
+				  <div>
+					<input type="radio" id="deaths" name="color" value="deaths">
+					<label for="deaths">Color by Deaths</label>
+				  </div>
+				  
+			</form>
+
+			Selected Date: {{searchDate}}
+			<form action="/" id="formSubmission" method="POST">
+				<input type="date" id="name" size=18 name="searchDate" placeholder="Date (MM/DD/YYYY)">
+				<input type="submit" value="Submit" style="position: relative; top: 5px;">
+			</form>
+		</div>
+
+	</body>
 </html>
