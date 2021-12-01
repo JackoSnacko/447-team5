@@ -9,13 +9,13 @@ app = Flask(__name__)
 #Constants
 DB_NAME = 'covid'
 TABLE_NAME = 'covid_data'
-CASES_DATA_FILE_PATH = '/Users/jackbitzel/Desktop/447-team5-main/static/covid_confirmed_usafacts.csv'
-DEATHS_DATA_FILE_PATH = '/Users/jackbitzel/Desktop/447-team5-main/static/covid_deaths_usafacts.csv'
-POP_DATA_FILE_PATH = '/Users/jackbitzel/Desktop/447-team5-main/static/uscounties.csv'
-VACCINATION_DATA_FILE_PATH = '/Users/jackbitzel/Desktop/447-team5-main/static/COVID-19_Vaccinations_in_the_United_States_County.csv'
+CASES_DATA_FILE_PATH = 'static/covid_confirmed_usafacts.csv'
+DEATHS_DATA_FILE_PATH = 'static/covid_deaths_usafacts.csv'
+POP_DATA_FILE_PATH = 'static/uscounties.csv'
+VACCINATION_DATA_FILE_PATH = 'static/COVID-19_Vaccinations_in_the_United_States_County.csv'
 
 #MySQL Connection
-sql_connection = pymysql.connect(host='localhost',user='root',password='piedmont',db=DB_NAME, use_unicode=True, charset='utf8')
+sql_connection = pymysql.connect(host='localhost',user=user,password=password,db=DB_NAME, use_unicode=True, charset='utf8')
 
 #OPENING FILE
 cases_dataFile = open(CASES_DATA_FILE_PATH,'r')
