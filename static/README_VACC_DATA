@@ -1,0 +1,5 @@
+The vaccination data csv file is too big to upload so you will have to go to:
+
+https://data.cdc.gov/Vaccinations/COVID-19-Vaccinations-in-the-United-States-County/8xkx-amqh
+
+and select export->csv, then place that file into your static folder.
