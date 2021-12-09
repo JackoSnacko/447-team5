@@ -166,6 +166,10 @@ new_data_pop = 0
 for row in pop_dataFile:
     new_data_pop += 1
 
+pop_dataFile.close()
+pop_dataFile = open(POP_DATA_FILE_PATH,'r')
+
+old_data_pop = 0
 sql = f'SELECT count(countyFIPS) FROM Population;'
 try:
     cur = sql_connection.cursor()
@@ -177,25 +181,27 @@ except Exception as e:
 
 sql_pop_columns = f'`{"CountyName"}`, `{"CountyFips"}`, `{"State"}`, `{"Population"}`'
 
-if old_data_pop == 0:
-    # only need to run this once
-    population_column_labels = ["CountyName", "CountyFips", "State", "Population"]
-    sql_data_columns = []
-    sql_columns = f''
-    for column in population_column_labels:
-        tmp_str = f''
-        sql_data_columns.append(f'`'+column+f'`')
-        if column == "CountyName":
-            tmp_str = f'`{column}` VARCHAR(50), '
-        elif column == "CountyFips":
-            tmp_str = f'`{column}` INT, '
-        elif column == "State":
-            tmp_str = f'`{column}` VARCHAR(2), '
-        elif column == "Population":
-            tmp_str = f'`{column}` INT'
-        sql_columns += tmp_str
-    sql_columns += f', PRIMARY KEY (CountyFips)'
+population_column_labels = ["CountyName", "CountyFips", "State", "Population"]
+sql_data_columns = []
+sql_columns = f''
+for column in population_column_labels:
+    tmp_str = f''
+    sql_data_columns.append(f'`'+column+f'`')
+    if column == "CountyName":
+        tmp_str = f'`{column}` VARCHAR(50), '
+    elif column == "CountyFips":
+        tmp_str = f'`{column}` INT, '
+    elif column == "State":
+        tmp_str = f'`{column}` VARCHAR(2), '
+    elif column == "Population":
+        tmp_str = f'`{column}` INT'
+    sql_columns += tmp_str
+sql_columns += f', PRIMARY KEY (CountyFips)'
 
+
+
+
+if old_data_pop < new_data_pop:
 
     #Execute MySQL query
     cur = sql_connection.cursor()
@@ -207,10 +213,11 @@ if old_data_pop == 0:
         sql_connection.commit()
     except Exception as e:
         print(e)
-if old_data_pop < new_data_pop:
+
     while True:
+
         #Get next line in csv file
-        
+
         pop_line = pop_dataFile.readline().rstrip('\n')
         #If end of file exit
         if not pop_line:
@@ -243,11 +250,14 @@ for row in vacc_dataFile:
     if vacc_line[0] != curr_date:
         num_days += 1
         curr_date = vacc_line[0]
-new_data_vacc
+
+new_data_vacc = num_days
 
 vacc_dataFile.close()
 vacc_dataFile = open(VACCINATION_DATA_FILE_PATH,'r')
 
+
+old_data_vacc = 0
 sql = f'select count(distinct date) from vaccination;'
 try:
     cur = sql_connection.cursor()
@@ -256,7 +266,6 @@ try:
     old_data_vacc = cur.fetchall()[0][0]
 except Exception as e:
     print(e)
-
 sql_vacc_columns = f'`{"Date"}`, `{"CountyName"}`, `{"CountyFips"}`, `{"State"}`, `{"VaccinationPercent"}`'
 
 ## Vaccination data
@@ -279,19 +288,6 @@ for column in vacc_column_labels:
         tmp_str = f'`{column}` DOUBLE(4, 2)'
     sql_columns += tmp_str
 sql_columns += f', PRIMARY KEY (Date, CountyFips)'
-
-
-if old_data_vacc == 0:
-    #Execute MySQL query
-    cur = sql_connection.cursor()
-    cur.execute(f'DROP TABLE IF EXISTS Vaccination;')
-    sql = f'CREATE TABLE IF NOT EXISTS Vaccination ({sql_columns});'
-    try:
-        cur = sql_connection.cursor()
-        cur.execute(sql)
-        sql_connection.commit()
-    except Exception as e:
-        print(e)
 
 if old_data_vacc < new_data_vacc:
 
