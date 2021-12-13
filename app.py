@@ -41,6 +41,9 @@ for row in cases_dataFile:
     new_data_cases = temp.count(',') + 1
     break
 
+cases_dataFile.close()
+cases_dataFile = open(CASES_DATA_FILE_PATH,'r')
+
 #Database Column Names
 #For loop creating sql query to create table for data
 
