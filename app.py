@@ -302,11 +302,11 @@ if old_data_vacc < new_data_vacc:
     except Exception as e:
         print(e)
 
-    vacc_line = vacc_dataFile.readline().rstrip('\n').rsplit(';')
+    vacc_line = vacc_dataFile.readline().rstrip('\n').rsplit(',')
 
     while True: 
         #Get next line in csv file
-        vacc_line = vacc_dataFile.readline().rstrip('\n').rsplit(';')
+        vacc_line = vacc_dataFile.readline().rstrip('\n').rsplit(',')
         #If end of file exit
         if not vacc_line:
             break
@@ -322,6 +322,7 @@ if old_data_vacc < new_data_vacc:
         countyName = vacc_line[3]
         stateName = vacc_line[4]
         vaccPercent = vacc_line[15]
+
         if stateName == "MD":
             if countyName not in ["Unknown County", "FIPS"]:
                 sql_values = f''
