@@ -126,6 +126,7 @@ try:
         cur = sql_connection.cursor()
         cur.execute(f'DELETE FROM {TABLE_NAME};')
 
+        test_c_line = f''
         #loops through data of csv file
         while True:
             #Get next line in csv file
@@ -133,7 +134,7 @@ try:
             deaths_line = deaths_dataFile.readline().rstrip('\n')
 
             #If end of file exit
-            if not cases_line:
+            if cases_line == "":
                 break
             
             cases_line = cases_line.split(",")
@@ -141,20 +142,20 @@ try:
 
             sql = f''
 
-            if cases_line[state_name_column] == "\"MD\"":
+            if cases_line[state_name_column] == "MD" and int(cases_line[county_fips_column]) != 0:
                 for i in range(4, len(cases_column_labels)):
                     if (cases_line[county_name_column][1:len(cases_line[county_name_column])-2] != "Statewide Unallocate"):
                         num_cases = 0
                         num_deaths = 0
                         sql_values = f''
                         #Date
-                        sql_values += f'\'{cases_column_labels[i]}\', '
+                        sql_values += f'"{cases_column_labels[i]}", '
                         #County
-                        sql_values += f'"{cases_line[county_name_column][1:len(cases_line[county_name_column])-2]}", '
+                        sql_values += f'"{cases_line[county_name_column]}", '
                         #county fips
                         sql_values += f'{cases_line[county_fips_column]}, '
                         #state name
-                        sql_values += f'{cases_line[state_name_column]}, '
+                        sql_values += f'"{cases_line[state_name_column]}", '
                         #state fips
                         sql_values += f'{cases_line[state_fips_column]}, '
                         #Cases
@@ -181,6 +182,7 @@ try:
                             sql_connection.commit()
                         except Exception as e:
                             print(e)
+
 except Exception as e:
     print(e)
 
@@ -261,6 +263,7 @@ if old_data_pop < new_data_pop:
                 sql_connection.commit()
             except Exception as e:
                 print(e)
+                
 
 ################# Population Formatting END
 
