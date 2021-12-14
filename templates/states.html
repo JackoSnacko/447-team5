@@ -160,11 +160,11 @@
 				}
 				
 				if (color == "cases") {
-					fill_color = getColor((counties[feature.properties.name][CASES] / counties[feature.properties.name][POPULATION]), "cases")
+					fill_color = getColor((counties[(feature.properties.name).concat(" ")][CASES] / counties[(feature.properties.name).concat(" ")][POPULATION]), "cases")
 				} else if (color == "deaths") {
-					fill_color = getColor((counties[feature.properties.name][DEATHS] / counties[feature.properties.name][POPULATION]), "deaths")
+					fill_color = getColor((counties[(feature.properties.name).concat(" ")][DEATHS] / counties[(feature.properties.name).concat(" ")][POPULATION]), "deaths")
 				} else if (color == "vaccrate") {
-					fill_color = getColor(counties[feature.properties.name][VACCRATE], "vaccrate")
+					fill_color = getColor(counties[(feature.properties.name).concat(" ")][VACCRATE], "vaccrate")
 				}
 				return {
 					weight: 2,
@@ -189,9 +189,9 @@
 				if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
 					layer.bringToFront();
 				}
-				var cases_density = ((counties[layer.feature.properties.name][CASES] / counties[layer.feature.properties.name][POPULATION]) * 1000).toFixed(2)
-				var deaths_density = ((counties[layer.feature.properties.name][DEATHS] / counties[layer.feature.properties.name][POPULATION]) * 1000).toFixed(2)
-				var vacc_rate = counties[layer.feature.properties.name][VACCRATE]
+				var cases_density = ((counties[(layer.feature.properties.name).concat(" ")][CASES] / counties[(layer.feature.properties.name).concat(" ")][POPULATION]) * 1000).toFixed(2)
+				var deaths_density = ((counties[(layer.feature.properties.name).concat(" ")][DEATHS] / counties[(layer.feature.properties.name).concat(" ")][POPULATION]) * 1000).toFixed(2)
+				var vacc_rate = counties[(layer.feature.properties.name).concat(" ")][VACCRATE]
 				
 				cases_density += " / 1000 people"
 				deaths_density += " / 1000 people"
