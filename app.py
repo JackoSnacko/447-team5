@@ -400,7 +400,7 @@ def main_page():
     min_date = cur.fetchall()
     min_date = str(min_date[0][0])
 
-    searchDate = str(max_date[0][0])
+    searchDate = max_date
 
 
     cur = sql_connection.cursor()
