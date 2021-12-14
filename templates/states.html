@@ -143,6 +143,8 @@
 				}
 			}
 			var counties = {{ counties_data | tojson }}
+
+
 			const CASES = 0
 			const DEATHS = 1
 			const POPULATION = 2
@@ -277,12 +279,21 @@
 				return div;
 			}
 
+			function set_date_range() {
+				var min_date = "{{min_date}}"
+				var max_date = "{{max_date}}"
+				document.getElementById("calendar").setAttribute('min',min_date);
+				document.getElementById("calendar").setAttribute('max',max_date);
+			}
+
+
+
 			legend.addTo(map);
 
 		</script>
 
 		<div class="overlay">
-			<form action="/" id="formSubmission2" method="POST">
+			
 			Selected Date: {{searchDate}}
 			<form action="/" id="formSubmission" method="POST">
 				<div>
@@ -300,7 +311,7 @@
 					<label for="vaccrate">Color by Vaccination %</label>
 				  </div>
 
-				<input type="date" id="name" size=18 name="searchDate" placeholder="Date (MM/DD/YYYY)">
+				<input type="date" id="calendar" size=18 name="searchDate" placeholder="Date (MM/DD/YYYY)" onClick="set_date_range();">
 				<input type="submit" value="Submit" style="position: relative; top: 5px;">
 			</form>
 		</div>
