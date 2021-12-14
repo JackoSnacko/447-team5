@@ -1,10 +1,22 @@
-from os import stat
+from os import stat, path
+from os.path import exists
 from flask import Flask, render_template, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 import datetime
 import pymysql
+import requests
+
 
 app = Flask(__name__)
+
+def downloadFile(fileUrl,filePath):
+    url = fileUrl
+    req = requests.get(url)
+    url_content = req.content
+    csv_file = open(filePath,'wb')
+    content = url_content.replace(b'"',b'')
+    csv_file.write(content)
+    csv_file.close()
 
 #Constants
 DB_NAME = 'covid'
@@ -14,17 +26,31 @@ DEATHS_DATA_FILE_PATH = 'static/covid_deaths_usafacts.csv'
 POP_DATA_FILE_PATH = 'static/uscounties.csv'
 VACCINATION_DATA_FILE_PATH = 'static/COVID-19_Vaccinations_in_the_United_States_County.csv'
 
+CASES_URL = 'https://static.usafacts.org/public/data/covid-19/covid_confirmed_usafacts.csv?_ga=2.206624086.437213270.1639370301-537660709.1639370301'
+DEATHS_URL = 'https://static.usafacts.org/public/data/covid-19/covid_deaths_usafacts.csv?_ga=2.250115779.437213270.1639370301-537660709.1639370301'
+POP_URL = 'https://static.usafacts.org/public/data/covid-19/covid_county_population_usafacts.csv?_ga=2.186169964.437213270.1639370301-537660709.1639370301'
+VACC_URL = 'https://data.cdc.gov/api/views/8xkx-amqh/rows.csv?accessType=DOWNLOAD'
+
+
 #MySQL Connection
 sql_connection = pymysql.connect(host='localhost',user='root',password='piedmont',db=DB_NAME, use_unicode=True, charset='utf8')
+
+
+#Download Data Files
+if not exists(CASES_DATA_FILE_PATH):
+    downloadFile(CASES_URL,CASES_DATA_FILE_PATH)
+if not exists(DEATHS_DATA_FILE_PATH):
+    downloadFile(DEATHS_URL,DEATHS_DATA_FILE_PATH)
+if not exists(POP_DATA_FILE_PATH):
+    downloadFile(POP_URL,POP_DATA_FILE_PATH)
+if not exists(VACCINATION_DATA_FILE_PATH):
+    downloadFile(VACC_URL,VACCINATION_DATA_FILE_PATH)
 
 #OPENING FILE
 cases_dataFile = open(CASES_DATA_FILE_PATH,'r')
 deaths_dataFile = open(DEATHS_DATA_FILE_PATH,'r')
 pop_dataFile = open(POP_DATA_FILE_PATH,'r')
 vacc_dataFile = open(VACCINATION_DATA_FILE_PATH,'r')
-
-
-
 
 ################# Cases / Deaths Formatting BEGIN
 
@@ -124,7 +150,6 @@ try:
                         #Date
                         sql_values += f'\'{cases_column_labels[i]}\', '
                         #County
-                        county = f'{cases_line[county_name_column][1:len(cases_line[county_name_column])-2]}'
                         sql_values += f'"{cases_line[county_name_column][1:len(cases_line[county_name_column])-2]}", '
                         #county fips
                         sql_values += f'{cases_line[county_fips_column]}, '
@@ -166,6 +191,7 @@ except Exception as e:
 
 ################# Population Formatting BEGIN
 new_data_pop = 0
+
 for row in pop_dataFile:
     new_data_pop += 1
 
@@ -201,11 +227,7 @@ for column in population_column_labels:
     sql_columns += tmp_str
 sql_columns += f', PRIMARY KEY (CountyFips)'
 
-
-
-
 if old_data_pop < new_data_pop:
-
     #Execute MySQL query
     cur = sql_connection.cursor()
     cur.execute(f'DROP TABLE IF EXISTS Population;')
@@ -245,30 +267,28 @@ if old_data_pop < new_data_pop:
 
 ################# Vaccination Formatting BEGIN
 
-new_data_vacc = 0
-curr_date = "2021-01-24"
-num_days = 0
-for row in vacc_dataFile:
-    vacc_line = vacc_dataFile.readline().rstrip('\n').rsplit(';')
-    if vacc_line[0] != curr_date:
-        num_days += 1
-        curr_date = vacc_line[0]
-
-new_data_vacc = num_days
+new_max_date = vacc_dataFile.readline().rstrip('\n').rsplit(',')
+new_max_date = vacc_dataFile.readline().rstrip('\n').rsplit(',')[0]
 
 vacc_dataFile.close()
 vacc_dataFile = open(VACCINATION_DATA_FILE_PATH,'r')
 
 
-old_data_vacc = 0
-sql = f'select count(distinct date) from vaccination;'
+old_max_date = "01/01/2020"
+
+sql = f'select max(date) from vaccination;'
 try:
     cur = sql_connection.cursor()
     cur.execute(sql)
     #Checks for data in table
-    old_data_vacc = cur.fetchall()[0][0]
+    old_max_date = str(cur.fetchall()[0][0])
+    month = old_max_date[5:7] 
+    day = old_max_date[8:10]
+    year = old_max_date[0:4]
+    old_max_date = month + '/' + day + '/' + year
 except Exception as e:
     print(e)
+
 sql_vacc_columns = f'`{"Date"}`, `{"CountyName"}`, `{"CountyFips"}`, `{"State"}`, `{"VaccinationPercent"}`'
 
 ## Vaccination data
@@ -292,8 +312,7 @@ for column in vacc_column_labels:
     sql_columns += tmp_str
 sql_columns += f', PRIMARY KEY (Date, CountyFips)'
 
-if old_data_vacc < new_data_vacc:
-
+if old_max_date < new_max_date:
     #Execute MySQL query
     cur = sql_connection.cursor()
     cur.execute(f'DROP TABLE IF EXISTS Vaccination;')
@@ -372,18 +391,29 @@ except Exception as e:
 def main_page():
 
     cur = sql_connection.cursor()
-
     cur.execute("select max(distinct Date) from covid_data;")
-    data = cur.fetchall()
-    searchDate = str(data[0][0])
+    max_date = cur.fetchall()
+    max_date = str(max_date[0][0])
+
+    cur = sql_connection.cursor()
+    cur.execute("select min(distinct Date) from covid_data;")
+    min_date = cur.fetchall()
+    min_date = str(min_date[0][0])
+
+    searchDate = str(max_date[0][0])
+
 
     cur = sql_connection.cursor()
     
     if(request.method=='POST'):
 
-        color = request.form['color']
-        
-        searchDate=request.form['searchDate'] 
+
+        DEFAULT_COLOR = 'cases'
+        color = request.form.get('color',DEFAULT_COLOR)
+
+
+        DEFAULT_SEARCH_DATE  = "2020-01-22"
+        searchDate=request.form.get('searchDate',DEFAULT_SEARCH_DATE)        
         if searchDate == "":
             searchDate = "2020-01-22"
 
@@ -401,7 +431,7 @@ def main_page():
     counties_data = {}
     for elem in data:
         counties_data[elem[1]] = [elem[2], elem[3], elem[4], elem[5]]
-    return render_template('states.html', counties_data=counties_data, searchDate = searchDate, color=color, num_counties=num_counties)
+    return render_template('states.html', counties_data=counties_data, searchDate = searchDate, color=color, num_counties=num_counties, min_date=min_date, max_date=max_date)
 
 if __name__ == "__main__":
     app.run(debug=True)
