@@ -3,6 +3,7 @@ from os.path import exists
 from flask import Flask, render_template, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 import datetime
+from datetime import date
 import pymysql
 import requests
 
@@ -56,19 +57,39 @@ vacc_dataFile = open(VACCINATION_DATA_FILE_PATH,'r')
 
 #Get column labels from cases csv file
 cases_column_labels = cases_dataFile.readline().rstrip('\n').split(",")
-
-#Gets number of rows in cases file to see if we need to update sql table
-for row in cases_dataFile:
-    temp = row
-    for i in range(0, 4):
-        c = ','
-        index = temp.find(c)
-        temp = temp[index + 1: ]
-    new_data_cases = temp.count(',') + 1
-    break
+max_cases_date_csv = cases_column_labels[len(cases_column_labels)-1]
 
 cases_dataFile.close()
 cases_dataFile = open(CASES_DATA_FILE_PATH,'r')
+
+
+today = date.today()
+one_day = datetime.timedelta(days=3)
+threshold = str(today - one_day)
+
+if(max_cases_date_csv < threshold):
+    print("updating cases/deaths files...")
+    downloadFile(CASES_URL,CASES_DATA_FILE_PATH)
+    downloadFile(DEATHS_URL,DEATHS_DATA_FILE_PATH)
+    print("finished updating cases/deaths files...")
+    header_cols = cases_dataFile.readline()
+    max_cases_date_csv = "20" + header_cols[len(header_cols)-9:len(header_cols)-1]
+    cases_dataFile.close()
+    cases_dataFile = open(CASES_DATA_FILE_PATH,'r')
+
+cur = sql_connection.cursor()
+
+sql = 'select max(date) from covid_data;'
+try:
+    cur = sql_connection.cursor()
+    cur.execute(sql)
+    max_cases_date_sql = str(cur.fetchall()[0][0])
+except Exception as e:
+    print(e)
+
+
+
+###test
 
 #Database Column Names
 #For loop creating sql query to create table for data
@@ -122,7 +143,8 @@ try:
     old_num_dates = cur.fetchall()[0][0]
     
     #If table is not up to date
-    if new_data_cases > old_num_dates:
+    if(max_cases_date_sql != max_cases_date_csv):
+
         cur = sql_connection.cursor()
         cur.execute(f'DELETE FROM {TABLE_NAME};')
 
@@ -250,12 +272,12 @@ if old_data_pop < new_data_pop:
         if not pop_line:
             break
         pop_line = pop_line.split(",")
-        if pop_line[4] == "\"MD\"":
+        if pop_line[2] == "MD" and int(pop_line[0]) != 0:
             sql_values = f''
-            sql_values += f'{pop_line[2]}, '
-            sql_values += f'{int(pop_line[3][1:len(pop_line[3])-1])}, '
-            sql_values += f'{pop_line[4]}, '
-            sql_values += f'{int(pop_line[8][1:len(pop_line[8])-2])}'
+            sql_values += f'"{pop_line[1]}", '
+            sql_values += f'{pop_line[0]}, '
+            sql_values += f'"{pop_line[2]}", '
+            sql_values += f'{pop_line[3]}'
             sql = f'INSERT INTO Population ({sql_pop_columns}) VALUES({sql_values})'
             try:
                 cur = sql_connection.cursor()
@@ -270,12 +292,39 @@ if old_data_pop < new_data_pop:
 
 ################# Vaccination Formatting BEGIN
 
-new_max_date = vacc_dataFile.readline().rstrip('\n').rsplit(',')
-new_max_date = vacc_dataFile.readline().rstrip('\n').rsplit(',')[0]
+max_vacc_date_csv = vacc_dataFile.readline().rstrip('\n').rsplit(',')
+max_vacc_date_csv = vacc_dataFile.readline().rstrip('\n').rsplit(',')[0]
 
 vacc_dataFile.close()
 vacc_dataFile = open(VACCINATION_DATA_FILE_PATH,'r')
 
+
+cur = sql_connection.cursor()
+sql = 'select max(date) from vaccination;'
+try:
+    cur = sql_connection.cursor()
+    cur.execute(sql)
+    max_vacc_date_sql = str(cur.fetchall()[0][0])
+except Exception as e:
+    print(e)
+
+year = max_vacc_date_csv[6:]
+month = max_vacc_date_csv[0:2]
+day = max_vacc_date_csv[3:5]
+max_vacc_date_csv = year + "-" + month + "-" + day
+
+if(max_vacc_date_csv < threshold):
+    print("updating vacc file...")
+    downloadFile(VACC_URL,VACCINATION_DATA_FILE_PATH)
+    print("finished updating vacc file...")
+    max_vacc_date_csv = vacc_dataFile.readline().rstrip('\n').rsplit(',')
+    max_vacc_date_csv = vacc_dataFile.readline().rstrip('\n').rsplit(',')[0]
+    year = max_vacc_date_csv[6:]
+    month = max_vacc_date_csv[0:2]
+    day = max_vacc_date_csv[3:5]
+    max_vacc_date_csv = year + "-" + month + "-" + day
+    vacc_dataFile.close()
+    vacc_dataFile = open(VACCINATION_DATA_FILE_PATH,'r')
 
 old_max_date = "01/01/2020"
 
@@ -315,7 +364,8 @@ for column in vacc_column_labels:
     sql_columns += tmp_str
 sql_columns += f', PRIMARY KEY (Date, CountyFips)'
 
-if old_max_date < new_max_date:
+
+if(max_vacc_date_sql != max_vacc_date_csv):
     #Execute MySQL query
     cur = sql_connection.cursor()
     cur.execute(f'DROP TABLE IF EXISTS Vaccination;')
@@ -388,7 +438,7 @@ try:
     num_counties = cur.fetchall()[0][0]
 except Exception as e:
     print(e)
-
+print("all data loaded")
 
 @app.route("/", methods=['GET', 'POST'])
 def main_page():
