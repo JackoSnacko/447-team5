@@ -39,12 +39,16 @@ sql_connection = pymysql.connect(host='localhost',user='root',password='piedmont
 
 #Download Data Files
 if not exists(CASES_DATA_FILE_PATH):
+    print("downloading cases file...")
     downloadFile(CASES_URL,CASES_DATA_FILE_PATH)
 if not exists(DEATHS_DATA_FILE_PATH):
+    print("downloading deaths file...")
     downloadFile(DEATHS_URL,DEATHS_DATA_FILE_PATH)
 if not exists(POP_DATA_FILE_PATH):
+    print("downloading population file...")
     downloadFile(POP_URL,POP_DATA_FILE_PATH)
 if not exists(VACCINATION_DATA_FILE_PATH):
+    print("downloading vaccination file...")
     downloadFile(VACC_URL,VACCINATION_DATA_FILE_PATH)
 
 #OPENING FILE
@@ -83,6 +87,7 @@ if(max_cases_date_csv < threshold or max_deaths_date_csv < threshold):
 cur = sql_connection.cursor()
 
 sql = 'select max(date) from covid_data;'
+max_cases_date_sql = "2020-01-01"
 try:
     cur = sql_connection.cursor()
     cur.execute(sql)
@@ -300,6 +305,7 @@ vacc_dataFile = open(VACCINATION_DATA_FILE_PATH,'r')
 
 cur = sql_connection.cursor()
 sql = 'select max(date) from vaccination;'
+max_vacc_date_sql = "2020-01-01"
 try:
     cur = sql_connection.cursor()
     cur.execute(sql)
