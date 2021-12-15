@@ -57,17 +57,20 @@ vacc_dataFile = open(VACCINATION_DATA_FILE_PATH,'r')
 
 #Get column labels from cases csv file
 cases_column_labels = cases_dataFile.readline().rstrip('\n').split(",")
+deaths_column_labels = deaths_dataFile.readline().rstrip('\n').split(",")
 max_cases_date_csv = cases_column_labels[len(cases_column_labels)-1]
+max_deaths_date_csv = deaths_column_labels[len(deaths_column_labels)-1]
 
 cases_dataFile.close()
 cases_dataFile = open(CASES_DATA_FILE_PATH,'r')
-
+deaths_dataFile.close()
+deaths_dataFile = open(CASES_DATA_FILE_PATH,'r')
 
 today = date.today()
 one_day = datetime.timedelta(days=3)
 threshold = str(today - one_day)
 
-if(max_cases_date_csv < threshold):
+if(max_cases_date_csv < threshold or max_deaths_date_csv < threshold):
     print("updating cases/deaths files...")
     downloadFile(CASES_URL,CASES_DATA_FILE_PATH)
     downloadFile(DEATHS_URL,DEATHS_DATA_FILE_PATH)
@@ -86,10 +89,6 @@ try:
     max_cases_date_sql = str(cur.fetchall()[0][0])
 except Exception as e:
     print(e)
-
-
-
-###test
 
 #Database Column Names
 #For loop creating sql query to create table for data
@@ -438,7 +437,6 @@ try:
     num_counties = cur.fetchall()[0][0]
 except Exception as e:
     print(e)
-print("all data loaded")
 
 @app.route("/", methods=['GET', 'POST'])
 def main_page():
