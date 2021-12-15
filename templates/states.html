@@ -107,26 +107,26 @@
 				if(type == "cases") {		
 					var d = (v) * 1000
 					return d > 60 ? '#800026' :
-							d > 3.6  ? '#8E1A33' :
-							d > 2.3  ? '#9C3441' :
-							d > 1.6  ? '#AA4F4E' :
-							d > 1.2  ? '#B8695C' :
-							d > 0.9   ? '#C68369' :
-							d > 0.6   ? '#D49E77' :
-							d > 0.4   ? '#E2B884' :
-							d > 0.1   ? '#F0D292' :
+							d > .36  ? '#8E1A33' :
+							d > .23  ? '#9C3441' :
+							d > .16  ? '#AA4F4E' :
+							d > .12  ? '#B8695C' :
+							d > .09   ? '#C68369' :
+							d > .06   ? '#D49E77' :
+							d > .04   ? '#E2B884' :
+							d > .01   ? '#F0D292' :
 										'#FFEDA0';
 				} else if (type == "deaths"){
 					var d = (v) * 1000				
 					return d > 60 ? '#800026' :
-							d > 32  ? '#8E1A33' :
-							d > 16  ? '#9C3441' :
-							d > 8  ? '#AA4F4E' :
-							d > 3  ? '#B8695C' :
-							d > 0.3   ? '#C68369' :
-							d > 0.15   ? '#D49E77' :
-							d > 0.04   ? '#E2B884' :
-							d > 0.02   ? '#F0D292' :
+							d > 3.2  ? '#8E1A33' :
+							d > 1.6  ? '#9C3441' :
+							d > .8  ? '#AA4F4E' :
+							d > .3  ? '#B8695C' :
+							d > .03   ? '#C68369' :
+							d > .015   ? '#D49E77' :
+							d > .004   ? '#E2B884' :
+							d > .002   ? '#F0D292' :
 										'#FFEDA0';
 				} else if (type == "vaccrate"){
 					var d = v
@@ -236,14 +236,14 @@
 
 				if (color == "cases") {
 					var div = L.DomUtil.create('div', 'info legend'),
-					grades = [0, 0.1, 0.4, 0.6, 0.9, 1.2, 1.6, 2.3, 3.6, 60],
+					grades = [0, .01, .04, .06, .09, .12, .16, .23, .36, 60],
 					labels = [],
 					from, to;
 					var type = "cases"
 					var divisor = 1000
 				} else if (color == "deaths") {
 					var div = L.DomUtil.create('div', 'info legend'),
-					grades = [0, 0.02, 0.04, 0.15, 0.3, 3, 8, 16, 32, 60],
+					grades = [0, .002, .004, .015, .03, .3, .8, 1.6, 3.2, 60],
 					labels = [],
 					from, to;
 					var type = "deaths"
