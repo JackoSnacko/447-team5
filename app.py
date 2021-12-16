@@ -34,7 +34,7 @@ VACC_URL = 'https://data.cdc.gov/api/views/8xkx-amqh/rows.csv?accessType=DOWNLOA
 
 
 #MySQL Connection
-sql_connection = pymysql.connect(host='localhost',user='root',password='piedmont',db=DB_NAME, use_unicode=True, charset='utf8')
+sql_connection = pymysql.connect(host='localhost',user='user',password='password',db=DB_NAME, use_unicode=True, charset='utf8')
 
 
 #Download Data Files
