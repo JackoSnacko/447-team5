@@ -168,7 +168,7 @@ try:
 
             sql = f''
 
-            if cases_line[state_name_column] == '"MD"' and int(cases_line[county_fips_column]) != 0:
+            if cases_line[state_name_column] == "MD" and int(cases_line[county_fips_column]) != 0:
                 for i in range(4, len(cases_column_labels)):
                     if (cases_line[county_name_column][1:len(cases_line[county_name_column])-2] != "Statewide Unallocate"):
                         num_cases = 0
@@ -177,11 +177,11 @@ try:
                         #Date
                         sql_values += f'"{cases_column_labels[i]}", '
                         #County
-                        sql_values += f'{cases_line[county_name_column]}, '
+                        sql_values += f'"{cases_line[county_name_column]}", '
                         #county fips
                         sql_values += f'{cases_line[county_fips_column]}, '
                         #state name
-                        sql_values += f'{cases_line[state_name_column]}, '
+                        sql_values += f'"{cases_line[state_name_column]}", '
                         #state fips
                         sql_values += f'{cases_line[state_fips_column]}, '
                         #Cases
