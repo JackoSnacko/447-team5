@@ -34,7 +34,7 @@ VACC_URL = 'https://data.cdc.gov/api/views/8xkx-amqh/rows.csv?accessType=DOWNLOA
 
 
 #MySQL Connection
-sql_connection = pymysql.connect(host='localhost',user='user',password='password',db=DB_NAME, use_unicode=True, charset='utf8')
+sql_connection = pymysql.connect(host='localhost',user='root',password='piedmont',db=DB_NAME, use_unicode=True, charset='utf8')
 
 
 #Download Data Files
@@ -68,11 +68,11 @@ max_deaths_date_csv = deaths_column_labels[len(deaths_column_labels)-1]
 cases_dataFile.close()
 cases_dataFile = open(CASES_DATA_FILE_PATH,'r')
 deaths_dataFile.close()
-deaths_dataFile = open(CASES_DATA_FILE_PATH,'r')
+deaths_dataFile = open(DEATHS_DATA_FILE_PATH,'r')
 
 today = date.today()
-one_day = datetime.timedelta(days=3)
-threshold = str(today - one_day)
+threshold = datetime.timedelta(days=7)
+threshold = str(today - threshold)
 
 if(max_cases_date_csv < threshold or max_deaths_date_csv < threshold):
     print("updating cases/deaths files...")
@@ -167,7 +167,6 @@ try:
             deaths_line = deaths_line.split(",")
 
             sql = f''
-
             if cases_line[state_name_column] == "MD" and int(cases_line[county_fips_column]) != 0:
                 for i in range(4, len(cases_column_labels)):
                     if (cases_line[county_name_column][1:len(cases_line[county_name_column])-2] != "Statewide Unallocate"):
